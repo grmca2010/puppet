@@ -1,0 +1,22 @@
+ Exec {
+     path => ["/usr/bin", "/bin", "/usr/sbin"]
+ }
+
+ stage {
+     'first': before => Stage['main'],
+ }
+ file {
+     '/etc/puppet/modules/facts/lib/facter/hello_new.rb': ensure => present,
+     content => inline_template("require 'facter'
+         Facter.add(: hostcertnamenew) do
+             setcode do
+                 Facter::Util::Resolution.exec('/bin/grep \"certname\" /etc/puppet/puppet.conf | sed  \"s/certname =//g\" | sed \"s/ //g\"')
+             end
+         end "),
+         before => File['/etc/puppet/modules/facts/lib/facter/hello_new.txt'],
+     }
+
+     file {
+         '/etc/puppet/modules/facts/lib/facter/hello_new.txt': ensure => present,
+         content => inline_template("$hostcertnamenew"),
+     }
